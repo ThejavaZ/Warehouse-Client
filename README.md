@@ -31,10 +31,10 @@ Abrir `http://localhost:5173` e iniciar sesión con un usuario de la API.
 
 ### Scripts
 
-| Comando | Qué hace |
-|---|---|
-| `bun run dev` | Servidor de desarrollo con hot reload |
-| `bun run build` | Compila tipos (`vue-tsc`) y genera `dist/` |
+| Comando           | Qué hace                                     |
+| ----------------- | -------------------------------------------- |
+| `bun run dev`     | Servidor de desarrollo con hot reload        |
+| `bun run build`   | Compila tipos (`vue-tsc`) y genera `dist/`   |
 | `bun run preview` | Sirve `dist/` en local para revisar el build |
 
 ---
@@ -75,10 +75,10 @@ src/
 └── router/         # Rutas + guards de sesión
 ```
 
-| MVVM | Aquí |
-|---|---|
-| **Model** | `api/` + `types/`: la verdad vive en el servidor, el cliente solo tiene el cliente HTTP y los contratos espejo |
-| **View** | el `<template>` de cada `.vue` |
+| MVVM          | Aquí                                                                                                           |
+| ------------- | -------------------------------------------------------------------------------------------------------------- |
+| **Model**     | `api/` + `types/`: la verdad vive en el servidor, el cliente solo tiene el cliente HTTP y los contratos espejo |
+| **View**      | el `<template>` de cada `.vue`                                                                                 |
 | **ViewModel** | `stores/` (Pinia) y el `<script setup>`: exponen estado reactivo y acciones, sin lógica de negocio en la vista |
 
 Regla práctica: **las vistas no llaman a axios directamente** (usan los módulos de `api/`) y **la API no se conoce en ningún sitio fuera de `api/` y `types/`**.
@@ -92,15 +92,15 @@ Regla práctica: **las vistas no llaman a axios directamente** (usan los módulo
 3. Un interceptor monta `Authorization: Bearer` en cada petición.
 4. El store programa un refresh con **30 segundos de margen** antes de que venza el access token.
 5. Al recargar la página, los guards esperan a `ensureRestored()`, que canjea el refresh token antes de decidir si la ruta es accesible.
-6. Un **401** (token caducado o revocado) limpia la sesión y manda al `/login`. En el login, un 401 significa *credenciales incorrectas* y no navega a ninguna parte.
+6. Un **401** (token caducado o revocado) limpia la sesión y manda al `/login`. En el login, un 401 significa _credenciales incorrectas_ y no navega a ninguna parte.
 7. `POST /api/Auth/revoke` cierra la sesión en el servidor (es idempotente).
 
 ### Rutas
 
-| Ruta | Acceso |
-|---|---|
-| `/` | pública |
-| `/login` | solo sin sesión (`guestOnly`) |
+| Ruta                                      | Acceso                            |
+| ----------------------------------------- | --------------------------------- |
+| `/`                                       | pública                           |
+| `/login`                                  | solo sin sesión (`guestOnly`)     |
 | `/users`, `/users/new`, `/users/:id/edit` | requieren sesión (`requiresAuth`) |
 
 ---
@@ -111,8 +111,9 @@ Regla práctica: **las vistas no llaman a axios directamente** (usan los módulo
 
 ```ts
 await usersApi.update(id, {
-  name, email,
-  ...(password ? { password } : {}),   // si está vacío, no viaja
+  name,
+  email,
+  ...(password ? { password } : {}), // si está vacío, no viaja
 });
 ```
 
