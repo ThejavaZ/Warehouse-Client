@@ -24,6 +24,9 @@ async function onLogout(): Promise<void> {
         </RouterLink>
 
         <template v-if="auth.isAuthenticated">
+          <RouterLink :to="{ name: 'users' }" class="text-slate-600 hover:text-slate-900">
+            Usuarios
+          </RouterLink>
           <span class="text-slate-500">{{ auth.email }}</span>
           <button
             type="button"

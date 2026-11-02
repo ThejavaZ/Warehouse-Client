@@ -21,6 +21,12 @@ export const router = createRouter({
       component: () => import("../views/LoginView.vue"),
       meta: { guestOnly: true },
     },
+    {
+      path: "/users",
+      name: "users",
+      component: () => import("../views/UsersView.vue"),
+      meta: { requiresAuth: true },
+    },
     // Sin coincidencia → inicio, en vez de una página en blanco.
     { path: "/:pathMatch(.*)*", redirect: "/" },
   ],
