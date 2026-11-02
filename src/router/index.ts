@@ -27,6 +27,18 @@ export const router = createRouter({
       component: () => import("../views/UsersView.vue"),
       meta: { requiresAuth: true },
     },
+    {
+      path: "/users/new",
+      name: "users.create",
+      component: () => import("../views/UserFormView.vue"),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/users/:id/edit",
+      name: "users.edit",
+      component: () => import("../views/UserFormView.vue"),
+      meta: { requiresAuth: true },
+    },
     // Sin coincidencia → inicio, en vez de una página en blanco.
     { path: "/:pathMatch(.*)*", redirect: "/" },
   ],

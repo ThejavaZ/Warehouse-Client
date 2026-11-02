@@ -89,6 +89,27 @@ export const useUsersStore = defineStore("users", () => {
     void load();
   }
 
+  /**
+   * Baja lógica del usuario. Distingue el 404 (ya estaba dado de baja) de un
+   * fallo real, para que la vista pueda mostrar el aviso adecuado; en el
+   * segundo caso el mensaje queda en `error`.
+   */
+  async function remove(id: number): Promise<"removed" | "not_found" | "error"> {
+    try {
+      await usersApi.remove(id);
+      await load();
+      return "removed";
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 404) {
+        await load();
+        return "not_found";
+      }
+
+      error.value = e instanceof ApiError ? e.message : "Error inesperado.";
+      return "error";
+    }
+  }
+
   return {
     // datos
     items,
@@ -110,5 +131,6 @@ export const useUsersStore = defineStore("users", () => {
     applyFilters,
     goToPage,
     resetFilters,
+    remove,
   };
 });

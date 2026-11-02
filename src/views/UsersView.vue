@@ -6,6 +6,26 @@ const users = useUsersStore();
 
 /** Texto del filtro de búsqueda; se sincroniza con el store al enviar. */
 const searchInput = ref("");
+/** Aviso transaccional (p. ej. dado de baja por otro administrador). */
+const notice = ref<string | null>(null);
+
+async function removeUser(id: number, email: string | null): Promise<void> {
+  const label = email ?? `#${id}`;
+
+  if (!window.confirm(`¿Dar de baja a ${label}? Se ocultará del listado activo.`)) {
+    return;
+  }
+
+  notice.value = null;
+  const result = await users.remove(id);
+
+  notice.value =
+    result === "removed"
+      ? `Usuario ${label} dado de baja.`
+      : result === "not_found"
+        ? `El usuario ${label} ya estaba dado de baja.`
+        : null; // error real: lo muestra el banner del store
+}
 
 function onSearch(): void {
   users.search = searchInput.value;
@@ -27,13 +47,29 @@ onMounted(() => void users.load());
 
 <template>
   <section class="space-y-4">
-    <div>
-      <h2 class="text-2xl font-semibold tracking-tight">Usuarios</h2>
-      <p class="mt-1 text-sm text-slate-600">
-        <code class="rounded bg-slate-200 px-1">GET /api/User</code>
-        · {{ users.totalItems }} resultado{{ users.totalItems === 1 ? "" : "s" }}
-      </p>
+    <div class="flex items-end justify-between gap-4">
+      <div>
+        <h2 class="text-2xl font-semibold tracking-tight">Usuarios</h2>
+        <p class="mt-1 text-sm text-slate-600">
+          <code class="rounded bg-slate-200 px-1">GET /api/User</code>
+          · {{ users.totalItems }} resultado{{ users.totalItems === 1 ? "" : "s" }}
+        </p>
+      </div>
+
+      <RouterLink
+        :to="{ name: 'users.create' }"
+        class="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
+      >
+        Nuevo usuario
+      </RouterLink>
     </div>
+
+    <p
+      v-if="notice"
+      class="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800"
+    >
+      {{ notice }}
+    </p>
 
     <!-- Filtros -->
     <form class="flex flex-wrap items-end gap-3" @submit.prevent="onSearch">
@@ -104,18 +140,19 @@ onMounted(() => void users.load());
             <th class="px-4 py-2 font-medium">Nombre</th>
             <th class="px-4 py-2 font-medium">Correo</th>
             <th class="px-4 py-2 font-medium">Estado</th>
+            <th class="px-4 py-2 text-right font-medium">Acciones</th>
           </tr>
         </thead>
 
         <tbody class="divide-y divide-slate-100">
           <tr v-if="users.loading && users.items.length === 0">
-            <td colspan="4" class="px-4 py-6 text-center text-slate-500">
+            <td colspan="5" class="px-4 py-6 text-center text-slate-500">
               Cargando…
             </td>
           </tr>
 
           <tr v-else-if="users.items.length === 0">
-            <td colspan="4" class="px-4 py-6 text-center text-slate-500">
+            <td colspan="5" class="px-4 py-6 text-center text-slate-500">
               No hay usuarios que coincidan con los filtros.
             </td>
           </tr>
@@ -134,6 +171,24 @@ onMounted(() => void users.load());
                 >
                   {{ user.isActive ? "Activo" : "De baja" }}
                 </span>
+              </td>
+              <td class="px-4 py-2 text-right">
+                <div class="flex justify-end gap-2">
+                  <RouterLink
+                    :to="{ name: 'users.edit', params: { id: user.id } }"
+                    class="rounded-md border border-slate-300 px-3 py-1 text-xs hover:bg-slate-100"
+                  >
+                    Editar
+                  </RouterLink>
+                  <button
+                    v-if="user.isActive"
+                    type="button"
+                    class="rounded-md border border-red-200 px-3 py-1 text-xs text-red-700 hover:bg-red-50"
+                    @click="removeUser(user.id, user.email)"
+                  >
+                    Dar de baja
+                  </button>
+                </div>
               </td>
             </tr>
           </template>
