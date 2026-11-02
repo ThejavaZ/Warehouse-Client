@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Entorno: las variables reales no se versionan (su ejemplo sí)
+.env
+.env.*
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
