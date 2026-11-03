@@ -12,15 +12,19 @@ import type { ProductListViewModel } from "../types/product";
 const products = useProductsStore();
 
 const searchInput = ref("");
+/** Aviso transaccional (p. ej. dado de baja por otro administrador). */
+const notice = ref<string | null>(null);
+
 const columns: TableColumn[] = [
   { key: "sku", label: "SKU" },
   { key: "name", label: "Nombre" },
   { key: "price", label: "Precio", align: "right" },
   { key: "status", label: "Estado" },
 ];
+
 /**
  * La API no define moneda, así que se formatea solo el número con dos
- * decimales: inventar un símetro sería prometer algo que el backend no dice.
+ * decimales: inventar un símbolo sería prometer algo que el backend no dice.
  */
 const priceFormatter = new Intl.NumberFormat("es-ES", {
   minimumFractionDigits: 2,
@@ -45,6 +49,24 @@ function clearFilters(): void {
   products.resetFilters();
 }
 
+async function removeProduct(id: number, sku: string | null): Promise<void> {
+  const label = sku ?? `#${id}`;
+
+  if (!window.confirm(`¿Dar de baja el producto ${label}? Se ocultará del catálogo activo.`)) {
+    return;
+  }
+
+  notice.value = null;
+  const result = await products.remove(id);
+
+  notice.value =
+    result === "removed"
+      ? `Producto ${label} dado de baja.`
+      : result === "not_found"
+        ? `El producto ${label} ya estaba dado de baja.`
+        : null;
+}
+
 onMounted(() => void products.load());
 </script>
 
@@ -54,7 +76,15 @@ onMounted(() => void products.load());
       <template #description>
         {{ products.totalItems }} resultado{{ products.totalItems === 1 ? "" : "s" }}
       </template>
+
+      <template #actions>
+        <RouterLink :to="{ name: 'products.create' }" class="btn-primary">
+          Nuevo producto
+        </RouterLink>
+      </template>
     </PageHeader>
+
+    <Alert v-if="notice" variant="warning">{{ notice }}</Alert>
 
     <!-- Filtros -->
     <form class="flex flex-wrap items-end gap-3" @submit.prevent="onSearch">
@@ -130,6 +160,25 @@ onMounted(() => void products.load());
         >
           {{ row.isActive ? "Activo" : "De baja" }}
         </span>
+      </template>
+
+      <template #actions="{ row }">
+        <div class="flex justify-end gap-2">
+          <RouterLink
+            :to="{ name: 'products.edit', params: { id: row.id } }"
+            class="btn-secondary btn-sm"
+          >
+            Editar
+          </RouterLink>
+          <button
+            v-if="row.isActive"
+            type="button"
+            class="btn-danger btn-sm"
+            @click="removeProduct(row.id, row.sku)"
+          >
+            Dar de baja
+          </button>
+        </div>
       </template>
 
       <template #loading>
