@@ -56,7 +56,7 @@ async function submit(): Promise<void> {
           type="email"
           required
           autocomplete="username"
-          class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
+          class="field"
         />
       </FormField>
 
@@ -67,17 +67,13 @@ async function submit(): Promise<void> {
           type="password"
           required
           autocomplete="current-password"
-          class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
+          class="field"
         />
       </FormField>
 
       <Alert v-if="error" variant="error">{{ error }}</Alert>
 
-      <button
-        type="submit"
-        :disabled="submitting"
-        class="w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
-      >
+      <button type="submit" :disabled="submitting" class="btn-primary w-full">
         {{ submitting ? "Entrando…" : "Entrar" }}
       </button>
     </form>

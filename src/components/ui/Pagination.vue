@@ -29,7 +29,7 @@ function go(target: number): void {
     <button
       type="button"
       :disabled="page <= 1 || loading"
-      class="rounded-md border border-slate-300 px-3 py-1.5 disabled:opacity-40"
+      class="btn-secondary px-3 py-1.5 disabled:opacity-40"
       @click="go(page - 1)"
     >
       Anterior
@@ -42,7 +42,7 @@ function go(target: number): void {
     <button
       type="button"
       :disabled="page >= totalPages || loading"
-      class="rounded-md border border-slate-300 px-3 py-1.5 disabled:opacity-40"
+      class="btn-secondary px-3 py-1.5 disabled:opacity-40"
       @click="go(page + 1)"
     >
       Siguiente

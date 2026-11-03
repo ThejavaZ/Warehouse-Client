@@ -44,3 +44,52 @@
   --color-success-800: #166534;
   --color-success-900: #14532d;
 }
+
+/*
+ * Botones y campos compartidos.
+ *
+ * Estaban repetidos literalmente en cada vista con las mismas cadenas de
+ * clases; aquí se declaran una vez. Al ir en @layer components, cualquier
+ * utilidad de Tailwind escrita en el template sigue ganando, así que una
+ * vista puede sobreescribir sin pelearse con la especificidad.
+ */
+@layer components {
+  /* Acción principal: morado */
+  .btn-primary {
+    @apply rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50;
+  }
+
+  /* Acción secundaria: contorno neutro que toma morado al pasar el ratón */
+  .btn-secondary {
+    @apply rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700;
+  }
+
+  /* Acción destructiva */
+  .btn-danger {
+    @apply rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-500 disabled:opacity-50;
+  }
+
+  /* Texto sin caja, para cancelar o limpiar */
+  .btn-ghost {
+    @apply rounded-md px-3 py-2 text-sm text-slate-600 hover:bg-primary-50 hover:text-primary-700;
+  }
+
+  /*
+   * Reducción de tamaño para botones dentro de filas de tabla.
+   * Va después de las variantes para que su padding gane por orden,
+   * igual que en CSS plano con la misma especificidad.
+   */
+  .btn-sm {
+    @apply px-3 py-1 text-xs;
+  }
+
+  /* Campo de texto y select: mismo foco morado en todas las vistas */
+  .field {
+    @apply mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200;
+  }
+
+  .field-invalid {
+    @apply border-red-400 focus:border-red-500 focus:ring-red-200;
+  }
+}
+

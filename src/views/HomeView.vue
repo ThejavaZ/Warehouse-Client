@@ -6,31 +6,65 @@ const auth = useAuthStore();
 </script>
 
 <template>
-  <section class="space-y-6">
-    <div>
-      <h2 class="text-2xl font-semibold tracking-tight">Warehouse</h2>
-      <p class="mt-2 max-w-2xl text-slate-600">
+  <section class="space-y-8">
+    <!-- Hero -->
+    <div class="rounded-xl border border-primary-100 bg-white p-8 shadow-sm">
+      <div class="flex items-center gap-3">
+        <span
+          class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-600 text-lg font-bold text-white"
+          aria-hidden="true"
+        >
+          W
+        </span>
+        <div>
+          <h2 class="text-2xl font-semibold tracking-tight">Warehouse</h2>
+          <p class="text-sm text-slate-500">Gestión de almacén</p>
+        </div>
+      </div>
+
+      <p class="mt-4 max-w-2xl text-slate-600">
         Cliente de la API de gestión de almacén. Autentícate para acceder a los
         endpoints protegidos.
       </p>
+
+      <div class="mt-6 flex gap-3">
+        <RouterLink
+          v-if="auth.isAuthenticated"
+          :to="{ name: 'users' }"
+          class="btn-primary"
+        >
+          Ir a usuarios
+        </RouterLink>
+
+        <RouterLink
+          v-else
+          :to="{ name: 'login' }"
+          class="btn-primary"
+        >
+          Iniciar sesión
+        </RouterLink>
+      </div>
     </div>
 
-    <div class="flex gap-3">
-      <RouterLink
-        v-if="auth.isAuthenticated"
-        :to="{ name: 'users' }"
-        class="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
-      >
-        Usuarios
-      </RouterLink>
+    <!-- Las tres piezas de la paleta, a modo de leyenda -->
+    <div class="grid gap-4 sm:grid-cols-3">
+      <div class="rounded-lg border border-slate-200 bg-white p-4">
+        <span class="block h-8 w-8 rounded-md bg-primary-600" aria-hidden="true" />
+        <p class="mt-3 text-sm font-medium">Morado · .NET</p>
+        <p class="mt-1 text-xs text-slate-500">Acciones principales y foco</p>
+      </div>
 
-      <RouterLink
-        v-else
-        :to="{ name: 'login' }"
-        class="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
-      >
-        Iniciar sesión
-      </RouterLink>
+      <div class="rounded-lg border border-slate-200 bg-white p-4">
+        <span class="block h-8 w-8 rounded-md bg-accent-500" aria-hidden="true" />
+        <p class="mt-3 text-sm font-medium">Verde · Vue</p>
+        <p class="mt-1 text-xs text-slate-500">Acentos y elementos activos</p>
+      </div>
+
+      <div class="rounded-lg border border-slate-200 bg-white p-4">
+        <span class="block h-8 w-8 rounded-md bg-success-900" aria-hidden="true" />
+        <p class="mt-3 text-sm font-medium">Verde oscuro · Éxito</p>
+        <p class="mt-1 text-xs text-slate-500">Confirmaciones y estados OK</p>
+      </div>
     </div>
   </section>
 </template>

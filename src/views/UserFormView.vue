@@ -111,8 +111,8 @@ async function submit(): Promise<void> {
           required
           minlength="2"
           maxlength="100"
-          class="mt-1 w-full rounded-md border px-3 py-2 text-sm focus:outline-none"
-          :class="invalid('Name') ? 'border-red-400' : 'border-slate-300'"
+          class="field"
+          :class="invalid('Name') && 'field-invalid'"
         />
       </FormField>
 
@@ -128,8 +128,8 @@ async function submit(): Promise<void> {
           type="email"
           required
           autocomplete="off"
-          class="mt-1 w-full rounded-md border px-3 py-2 text-sm focus:outline-none"
-          :class="invalid('Email') ? 'border-red-400' : 'border-slate-300'"
+          class="field"
+          :class="invalid('Email') && 'field-invalid'"
         />
       </FormField>
 
@@ -148,26 +148,19 @@ async function submit(): Promise<void> {
           minlength="8"
           :placeholder="isEdit ? 'Sin cambios' : 'Mínimo 8 caracteres'"
           autocomplete="new-password"
-          class="mt-1 w-full rounded-md border px-3 py-2 text-sm focus:outline-none"
-          :class="invalid('Password') ? 'border-red-400' : 'border-slate-300'"
+          class="field"
+          :class="invalid('Password') && 'field-invalid'"
         />
       </FormField>
 
       <Alert v-if="error" variant="error">{{ error }}</Alert>
 
       <div class="flex gap-3">
-        <button
-          type="submit"
-          :disabled="saving"
-          class="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
-        >
+        <button type="submit" :disabled="saving" class="btn-primary">
           {{ saving ? "Guardando…" : "Guardar" }}
         </button>
 
-        <RouterLink
-          :to="{ name: 'users' }"
-          class="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-100"
-        >
+        <RouterLink :to="{ name: 'users' }" class="btn-secondary">
           Cancelar
         </RouterLink>
       </div>

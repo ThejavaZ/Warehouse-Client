@@ -12,10 +12,14 @@ const props = withDefaults(
 );
 
 const styles: Record<string, string> = {
+  // Error y aviso conservan rojo/ámbar: son colores semánticos, no de marca,
+  // y cambiarlos por morado/verde confundiría en vez de aclarar.
   error: "border-red-300 bg-red-50 text-red-700",
-  success: "border-emerald-300 bg-emerald-50 text-emerald-800",
   warning: "border-amber-300 bg-amber-50 text-amber-800",
-  info: "border-sky-300 bg-sky-50 text-sky-800",
+  // El éxito usa el verde oscuro de la paleta, no el acento de Vue, para que
+  // el texto pase el contraste AA sobre fondo claro.
+  success: "border-success-200 bg-success-50 text-success-900",
+  info: "border-primary-200 bg-primary-50 text-primary-800",
 };
 </script>
 

@@ -15,6 +15,8 @@ withDefaults(
 <template>
   <div class="flex flex-wrap items-end justify-between gap-4">
     <div class="min-w-0">
+      <!-- Filete verde: el acento de Vue marca el inicio de cada página -->
+      <span class="mb-2 block h-1 w-10 rounded-full bg-accent-500" aria-hidden="true" />
       <h2 class="text-2xl font-semibold tracking-tight">{{ title }}</h2>
       <p v-if="description || $slots.description" class="mt-1 text-sm text-slate-600">
         <slot name="description">{{ description }}</slot>

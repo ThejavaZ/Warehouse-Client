@@ -67,10 +67,7 @@ onMounted(() => void users.load());
       </template>
 
       <template #actions>
-        <RouterLink
-          :to="{ name: 'users.create' }"
-          class="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
-        >
+        <RouterLink :to="{ name: 'users.create' }" class="btn-primary">
           Nuevo usuario
         </RouterLink>
       </template>
@@ -87,7 +84,7 @@ onMounted(() => void users.load());
           v-model="searchInput"
           type="search"
           placeholder="Nombre o correo"
-          class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
+          class="field"
         />
       </div>
 
@@ -96,7 +93,7 @@ onMounted(() => void users.load());
         <select
           id="status"
           v-model="users.isActive"
-          class="mt-1 rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
+          class="field"
           @change="onFilterChange"
         >
           <option :value="null">Todos</option>
@@ -115,18 +112,9 @@ onMounted(() => void users.load());
         Más recientes primero
       </label>
 
-      <button
-        type="submit"
-        class="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-100"
-      >
-        Buscar
-      </button>
+      <button type="submit" class="btn-secondary">Buscar</button>
 
-      <button
-        type="button"
-        class="rounded-md px-3 py-2 text-sm text-slate-600 hover:bg-slate-100"
-        @click="clearFilters"
-      >
+      <button type="button" class="btn-ghost" @click="clearFilters">
         Limpiar
       </button>
     </form>
@@ -156,7 +144,7 @@ onMounted(() => void users.load());
         <span
           class="rounded-full px-2 py-0.5 text-xs font-medium"
           :class="row.isActive
-            ? 'bg-emerald-100 text-emerald-800'
+            ? 'bg-success-100 text-success-900'
             : 'bg-slate-200 text-slate-600'"
         >
           {{ row.isActive ? "Activo" : "De baja" }}
@@ -167,14 +155,14 @@ onMounted(() => void users.load());
         <div class="flex justify-end gap-2">
           <RouterLink
             :to="{ name: 'users.edit', params: { id: row.id } }"
-            class="rounded-md border border-slate-300 px-3 py-1 text-xs hover:bg-slate-100"
+            class="btn-secondary btn-sm"
           >
             Editar
           </RouterLink>
           <button
             v-if="row.isActive"
             type="button"
-            class="rounded-md border border-red-200 px-3 py-1 text-xs text-red-700 hover:bg-red-50"
+            class="btn-danger btn-sm"
             @click="removeUser(row.id, row.email)"
           >
             Dar de baja
