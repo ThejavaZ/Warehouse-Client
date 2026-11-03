@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import Alert from "../components/ui/Alert.vue";
+import DataTable, { type TableColumn } from "../components/ui/DataTable.vue";
+import EmptyState from "../components/ui/EmptyState.vue";
+import LoadingState from "../components/ui/LoadingState.vue";
+import PageHeader from "../components/ui/PageHeader.vue";
+import Pagination from "../components/ui/Pagination.vue";
 import { useUsersStore } from "../stores/users";
+import type { UserListViewModel } from "../types/user";
 
 const users = useUsersStore();
 
@@ -8,6 +15,28 @@ const users = useUsersStore();
 const searchInput = ref("");
 /** Aviso transaccional (p. ej. dado de baja por otro administrador). */
 const notice = ref<string | null>(null);
+
+const columns: TableColumn[] = [
+  { key: "id", label: "ID" },
+  { key: "name", label: "Nombre" },
+  { key: "email", label: "Correo" },
+  { key: "status", label: "Estado" },
+];
+
+function onSearch(): void {
+  users.search = searchInput.value;
+  users.applyFilters();
+}
+
+/** El selector y el orden cambian el resultado sin necesidad de botón. */
+function onFilterChange(): void {
+  users.applyFilters();
+}
+
+function clearFilters(): void {
+  searchInput.value = "";
+  users.resetFilters();
+}
 
 async function removeUser(id: number, email: string | null): Promise<void> {
   const label = email ?? `#${id}`;
@@ -27,48 +56,27 @@ async function removeUser(id: number, email: string | null): Promise<void> {
         : null; // error real: lo muestra el banner del store
 }
 
-function onSearch(): void {
-  users.search = searchInput.value;
-  users.applyFilters();
-}
-
-/** El selector y el orden cambian el resultado sin necesidad de botón. */
-function onFilterChange(): void {
-  users.applyFilters();
-}
-
-function clearFilters(): void {
-  searchInput.value = "";
-  users.resetFilters();
-}
-
 onMounted(() => void users.load());
 </script>
 
 <template>
   <section class="space-y-4">
-    <div class="flex items-end justify-between gap-4">
-      <div>
-        <h2 class="text-2xl font-semibold tracking-tight">Usuarios</h2>
-        <p class="mt-1 text-sm text-slate-600">
-          {{ users.totalItems }} resultado{{ users.totalItems === 1 ? "" : "s" }}
-        </p>
-      </div>
+    <PageHeader title="Usuarios">
+      <template #description>
+        {{ users.totalItems }} resultado{{ users.totalItems === 1 ? "" : "s" }}
+      </template>
 
-      <RouterLink
-        :to="{ name: 'users.create' }"
-        class="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
-      >
-        Nuevo usuario
-      </RouterLink>
-    </div>
+      <template #actions>
+        <RouterLink
+          :to="{ name: 'users.create' }"
+          class="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
+        >
+          Nuevo usuario
+        </RouterLink>
+      </template>
+    </PageHeader>
 
-    <p
-      v-if="notice"
-      class="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800"
-    >
-      {{ notice }}
-    </p>
+    <Alert v-if="notice" variant="warning">{{ notice }}</Alert>
 
     <!-- Filtros -->
     <form class="flex flex-wrap items-end gap-3" @submit.prevent="onSearch">
@@ -123,101 +131,71 @@ onMounted(() => void users.load());
       </button>
     </form>
 
-    <p
-      v-if="users.error"
-      class="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700"
+    <Alert v-if="users.error" variant="error">{{ users.error }}</Alert>
+
+    <DataTable
+      :columns="columns"
+      :rows="users.items"
+      :row-key="(user: UserListViewModel) => user.id"
+      :loading="users.loading && users.items.length === 0"
+      empty-message="No hay usuarios que coincidan con los filtros."
     >
-      {{ users.error }}
-    </p>
+      <template #cell-id="{ row }">
+        <span class="text-slate-500">{{ row.id }}</span>
+      </template>
 
-    <!-- Listado -->
-    <div class="overflow-x-auto rounded-lg border border-slate-200 bg-white">
-      <table class="min-w-full divide-y divide-slate-200 text-sm">
-        <thead class="bg-slate-50 text-left text-slate-500">
-          <tr>
-            <th class="px-4 py-2 font-medium">ID</th>
-            <th class="px-4 py-2 font-medium">Nombre</th>
-            <th class="px-4 py-2 font-medium">Correo</th>
-            <th class="px-4 py-2 font-medium">Estado</th>
-            <th class="px-4 py-2 text-right font-medium">Acciones</th>
-          </tr>
-        </thead>
+      <template #cell-name="{ row }">
+        <span class="font-medium">{{ row.name ?? "—" }}</span>
+      </template>
 
-        <tbody class="divide-y divide-slate-100">
-          <tr v-if="users.loading && users.items.length === 0">
-            <td colspan="5" class="px-4 py-6 text-center text-slate-500">
-              Cargando…
-            </td>
-          </tr>
+      <template #cell-email="{ row }">
+        <span class="text-slate-600">{{ row.email ?? "—" }}</span>
+      </template>
 
-          <tr v-else-if="users.items.length === 0">
-            <td colspan="5" class="px-4 py-6 text-center text-slate-500">
-              No hay usuarios que coincidan con los filtros.
-            </td>
-          </tr>
+      <template #cell-status="{ row }">
+        <span
+          class="rounded-full px-2 py-0.5 text-xs font-medium"
+          :class="row.isActive
+            ? 'bg-emerald-100 text-emerald-800'
+            : 'bg-slate-200 text-slate-600'"
+        >
+          {{ row.isActive ? "Activo" : "De baja" }}
+        </span>
+      </template>
 
-          <template v-else>
-            <tr v-for="user in users.items" :key="user.id" class="hover:bg-slate-50">
-              <td class="px-4 py-2 text-slate-500">{{ user.id }}</td>
-              <td class="px-4 py-2 font-medium">{{ user.name ?? "—" }}</td>
-              <td class="px-4 py-2 text-slate-600">{{ user.email ?? "—" }}</td>
-              <td class="px-4 py-2">
-                <span
-                  class="rounded-full px-2 py-0.5 text-xs font-medium"
-                  :class="user.isActive
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : 'bg-slate-200 text-slate-600'"
-                >
-                  {{ user.isActive ? "Activo" : "De baja" }}
-                </span>
-              </td>
-              <td class="px-4 py-2 text-right">
-                <div class="flex justify-end gap-2">
-                  <RouterLink
-                    :to="{ name: 'users.edit', params: { id: user.id } }"
-                    class="rounded-md border border-slate-300 px-3 py-1 text-xs hover:bg-slate-100"
-                  >
-                    Editar
-                  </RouterLink>
-                  <button
-                    v-if="user.isActive"
-                    type="button"
-                    class="rounded-md border border-red-200 px-3 py-1 text-xs text-red-700 hover:bg-red-50"
-                    @click="removeUser(user.id, user.email)"
-                  >
-                    Dar de baja
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </template>
-        </tbody>
-      </table>
-    </div>
+      <template #actions="{ row }">
+        <div class="flex justify-end gap-2">
+          <RouterLink
+            :to="{ name: 'users.edit', params: { id: row.id } }"
+            class="rounded-md border border-slate-300 px-3 py-1 text-xs hover:bg-slate-100"
+          >
+            Editar
+          </RouterLink>
+          <button
+            v-if="row.isActive"
+            type="button"
+            class="rounded-md border border-red-200 px-3 py-1 text-xs text-red-700 hover:bg-red-50"
+            @click="removeUser(row.id, row.email)"
+          >
+            Dar de baja
+          </button>
+        </div>
+      </template>
 
-    <!-- Paginación -->
-    <nav v-if="users.totalPages > 1" class="flex items-center justify-between text-sm">
-      <button
-        type="button"
-        :disabled="!users.hasPreviousPage || users.loading"
-        class="rounded-md border border-slate-300 px-3 py-1.5 disabled:opacity-40"
-        @click="users.goToPage(users.page - 1)"
-      >
-        Anterior
-      </button>
+      <template #loading>
+        <LoadingState />
+      </template>
 
-      <span class="text-slate-600">
-        Página {{ users.page }} de {{ users.totalPages }}
-      </span>
+      <template #empty>
+        <EmptyState message="No hay usuarios que coincidan con los filtros." />
+      </template>
+    </DataTable>
 
-      <button
-        type="button"
-        :disabled="!users.hasNextPage || users.loading"
-        class="rounded-md border border-slate-300 px-3 py-1.5 disabled:opacity-40"
-        @click="users.goToPage(users.page + 1)"
-      >
-        Siguiente
-      </button>
-    </nav>
+    <Pagination
+      :page="users.page"
+      :total-pages="users.totalPages"
+      :loading="users.loading"
+      @change="users.goToPage"
+    />
   </section>
 </template>

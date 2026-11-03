@@ -1,10 +1,14 @@
 <script setup lang="ts">
-/** Estado de carga de una tabla o listado. Sin dependencias de la API. */
+/**
+ * Estado de carga de una tabla o listado. Sin dependencias de la API.
+ * No lleva padding: quien lo encaja (la celda de DataTable) lo pone, para
+ * no duplicarlo.
+ */
 withDefaults(defineProps<{ message?: string }>(), { message: "Cargando…" });
 </script>
 
 <template>
-  <div class="flex items-center justify-center gap-2 px-4 py-6 text-sm text-slate-500">
+  <div class="flex items-center justify-center gap-2 text-sm text-slate-500">
     <svg
       class="h-4 w-4 animate-spin text-slate-400"
       xmlns="http://www.w3.org/2000/svg"

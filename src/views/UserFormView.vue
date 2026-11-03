@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import Alert from "../components/ui/Alert.vue";
+import FormField from "../components/ui/FormField.vue";
+import PageHeader from "../components/ui/PageHeader.vue";
 import { ApiError } from "../api/http";
 import { usersApi } from "../api/users";
 import { useUsersStore } from "../stores/users";
@@ -24,6 +27,11 @@ const saving = ref(false);
 const error = ref<string | null>(null);
 /** Mensajes de validación por campo que devuelve la API. */
 const fieldErrors = ref<Record<string, string[]>>({});
+
+/** Marca el control con borde rojo cuando su campo tiene errores. */
+function invalid(field: string): boolean {
+  return (fieldErrors.value[field]?.length ?? 0) > 0;
+}
 
 onMounted(async () => {
   if (!isEdit.value) return;
@@ -82,20 +90,20 @@ async function submit(): Promise<void> {
 
 <template>
   <section class="mx-auto max-w-lg space-y-4">
-    <div>
-      <h2 class="text-2xl font-semibold tracking-tight">
-        {{ isEdit ? "Editar usuario" : "Nuevo usuario" }}
-      </h2>
-      <p class="mt-1 text-sm text-slate-600">
-        {{ isEdit ? `Usuario #${userId}` : "Alta en el módulo de usuarios" }}
-      </p>
-    </div>
+    <PageHeader
+      :title="isEdit ? 'Editar usuario' : 'Nuevo usuario'"
+      :description="isEdit ? `Usuario #${userId}` : 'Alta en el módulo de usuarios'"
+    />
 
-    <p v-if="loading" class="text-sm text-slate-600">Cargando usuario…</p>
+    <Alert v-if="loading" variant="info">Cargando usuario…</Alert>
 
     <form v-else class="space-y-4" novalidate @submit.prevent="submit">
-      <div>
-        <label for="name" class="block text-sm font-medium">Nombre</label>
+      <FormField
+        input-id="name"
+        label="Nombre"
+        required
+        :errors="fieldErrors.Name"
+      >
         <input
           id="name"
           v-model="form.name"
@@ -103,37 +111,35 @@ async function submit(): Promise<void> {
           required
           minlength="2"
           maxlength="100"
-          class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
-          :class="fieldErrors.Name && 'border-red-400'"
+          class="mt-1 w-full rounded-md border px-3 py-2 text-sm focus:outline-none"
+          :class="invalid('Name') ? 'border-red-400' : 'border-slate-300'"
         />
-        <p v-for="msg in fieldErrors.Name" :key="msg" class="mt-1 text-xs text-red-600">
-          {{ msg }}
-        </p>
-      </div>
+      </FormField>
 
-      <div>
-        <label for="user-email" class="block text-sm font-medium">Correo</label>
+      <FormField
+        input-id="user-email"
+        label="Correo"
+        required
+        :errors="fieldErrors.Email"
+      >
         <input
           id="user-email"
           v-model="form.email"
           type="email"
           required
           autocomplete="off"
-          class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
-          :class="fieldErrors.Email && 'border-red-400'"
+          class="mt-1 w-full rounded-md border px-3 py-2 text-sm focus:outline-none"
+          :class="invalid('Email') ? 'border-red-400' : 'border-slate-300'"
         />
-        <p v-for="msg in fieldErrors.Email" :key="msg" class="mt-1 text-xs text-red-600">
-          {{ msg }}
-        </p>
-      </div>
+      </FormField>
 
-      <div>
-        <label for="user-password" class="block text-sm font-medium">
-          Contraseña
-          <span v-if="isEdit" class="font-normal text-slate-500">
-            (déjala en blanco para no cambiarla)
-          </span>
-        </label>
+      <FormField
+        input-id="user-password"
+        label="Contraseña"
+        :hint="isEdit ? '(déjala en blanco para no cambiarla)' : undefined"
+        :required="!isEdit"
+        :errors="fieldErrors.Password"
+      >
         <input
           id="user-password"
           v-model="form.password"
@@ -142,20 +148,12 @@ async function submit(): Promise<void> {
           minlength="8"
           :placeholder="isEdit ? 'Sin cambios' : 'Mínimo 8 caracteres'"
           autocomplete="new-password"
-          class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
-          :class="fieldErrors.Password && 'border-red-400'"
+          class="mt-1 w-full rounded-md border px-3 py-2 text-sm focus:outline-none"
+          :class="invalid('Password') ? 'border-red-400' : 'border-slate-300'"
         />
-        <p v-for="msg in fieldErrors.Password" :key="msg" class="mt-1 text-xs text-red-600">
-          {{ msg }}
-        </p>
-      </div>
+      </FormField>
 
-      <p
-        v-if="error"
-        class="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700"
-      >
-        {{ error }}
-      </p>
+      <Alert v-if="error" variant="error">{{ error }}</Alert>
 
       <div class="flex gap-3">
         <button

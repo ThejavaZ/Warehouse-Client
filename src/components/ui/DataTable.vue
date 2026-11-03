@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="T">
 import { useSlots } from "vue";
 
 /**
@@ -8,8 +8,8 @@ import { useSlots } from "vue";
  * `cell-<key>`; si no se aporta slot, se pinta el valor tal cual. El slot
  * `actions` añade la última columna (solo si se usa, para no dejar un hueco).
  *
- * `generic="T"` conserva el tipo de la fila en los slots, así en la vista
- * `row` sigue siendo `ProductViewModel` y no `any`.
+ * `generic="T"` conserva el tipo de la fila en los slots: en la vista `row`
+ * sigue siendo `UserListViewModel` y no `unknown`.
  */
 export interface TableColumn {
   /** Clave del dato y sufijo del slot (`cell-<key>`). */
@@ -21,9 +21,9 @@ export interface TableColumn {
 const props = withDefaults(
   defineProps<{
     columns: TableColumn[];
-    rows: readonly unknown[];
+    rows: readonly T[];
     /** Identificador estable de la fila (la API usa `id`). */
-    rowKey: (row: never) => string | number;
+    rowKey: (row: T) => string | number;
     loading?: boolean;
     emptyMessage?: string;
   }>(),
@@ -40,7 +40,7 @@ function alignClass(align: TableColumn["align"]): string {
  * Lee una celda sin exigir que el tipo de fila tenga índice de firmas
  * (las interfaces no lo tienen). El valor se pinta como texto.
  */
-function cellValue(row: unknown, key: string): unknown {
+function cellValue(row: T, key: string): unknown {
   return (row as Record<string, unknown>)[key];
 }
 
@@ -84,7 +84,7 @@ function columnCount(): number {
         </tr>
 
         <template v-else>
-          <tr v-for="row in rows" :key="rowKey(row as never)" class="hover:bg-slate-50">
+          <tr v-for="row in rows" :key="rowKey(row)" class="hover:bg-slate-50">
             <td
               v-for="column in columns"
               :key="column.key"
