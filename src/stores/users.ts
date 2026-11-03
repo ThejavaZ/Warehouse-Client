@@ -14,7 +14,11 @@ export const useUsersStore = defineStore("users", () => {
   // los suyos; la vista los muta con v-model y llama a applyFilters().
   const search = ref("");
   const isActive = ref<boolean | null>(null);
-  const orderDesc = ref(false);
+  // true = más recientes primero, que es el default de PagedQuery en la API.
+  // Antes era false y el listado venía ascendente mientras la API, sin este
+  // parámetro, ordena descendente: el cliente mostraba otro orden que el que
+  // devolvía el servidor por defecto.
+  const orderDesc = ref(true);
 
   const list = usePagedList<UserListViewModel>((page, pageSize) =>
     usersApi.list({
@@ -30,7 +34,7 @@ export const useUsersStore = defineStore("users", () => {
   function resetFilters(): void {
     search.value = "";
     isActive.value = null;
-    orderDesc.value = false;
+    orderDesc.value = true;
     list.applyFilters();
   }
 
