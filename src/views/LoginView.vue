@@ -37,8 +37,7 @@ async function submit(): Promise<void> {
   <section class="mx-auto max-w-sm">
     <h2 class="text-2xl font-semibold tracking-tight">Iniciar sesión</h2>
     <p class="mt-2 text-sm text-slate-600">
-      Autentícate contra <code class="rounded bg-slate-200 px-1">/api/Auth/login</code>
-      para obtener un access token.
+      Introduce tus credenciales para obtener un access token.
     </p>
 
     <p

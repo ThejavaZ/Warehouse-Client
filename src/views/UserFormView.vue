@@ -87,9 +87,7 @@ async function submit(): Promise<void> {
         {{ isEdit ? "Editar usuario" : "Nuevo usuario" }}
       </h2>
       <p class="mt-1 text-sm text-slate-600">
-        <code class="rounded bg-slate-200 px-1">
-          {{ isEdit ? `PUT /api/User/${userId}` : "POST /api/User" }}
-        </code>
+        {{ isEdit ? `Usuario #${userId}` : "Alta en el módulo de usuarios" }}
       </p>
     </div>
 

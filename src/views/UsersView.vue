@@ -51,8 +51,7 @@ onMounted(() => void users.load());
       <div>
         <h2 class="text-2xl font-semibold tracking-tight">Usuarios</h2>
         <p class="mt-1 text-sm text-slate-600">
-          <code class="rounded bg-slate-200 px-1">GET /api/User</code>
-          · {{ users.totalItems }} resultado{{ users.totalItems === 1 ? "" : "s" }}
+          {{ users.totalItems }} resultado{{ users.totalItems === 1 ? "" : "s" }}
         </p>
       </div>
 
