@@ -60,6 +60,14 @@ async function onLogout(): Promise<void> {
             Almacenes
           </RouterLink>
 
+          <RouterLink
+            :to="{ name: 'inventory' }"
+            class="text-slate-600 hover:text-primary-700"
+            active-class="text-primary-700 font-medium"
+          >
+            Inventario
+          </RouterLink>
+
           <span class="flex items-center gap-2 text-slate-500">
             <span
               class="h-2 w-2 rounded-full bg-accent-500"

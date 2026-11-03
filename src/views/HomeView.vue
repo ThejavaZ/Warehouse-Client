@@ -39,6 +39,9 @@ const auth = useAuthStore();
           <RouterLink :to="{ name: 'warehouses' }" class="btn-secondary">
             Almacenes
           </RouterLink>
+          <RouterLink :to="{ name: 'inventory' }" class="btn-secondary">
+            Inventario
+          </RouterLink>
         </template>
 
         <RouterLink v-else :to="{ name: 'login' }" class="btn-primary">
