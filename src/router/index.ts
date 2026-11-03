@@ -57,6 +57,12 @@ export const router = createRouter({
       component: () => import("../views/ProductFormView.vue"),
       meta: { requiresAuth: true },
     },
+    {
+      path: "/warehouses",
+      name: "warehouses",
+      component: () => import("../views/WarehousesView.vue"),
+      meta: { requiresAuth: true },
+    },
     // Sin coincidencia → inicio, en vez de una página en blanco.
     { path: "/:pathMatch(.*)*", redirect: "/" },
   ],
