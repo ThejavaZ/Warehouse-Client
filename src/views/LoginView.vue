@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import Alert from "../components/ui/Alert.vue";
+import FormField from "../components/ui/FormField.vue";
+import PageHeader from "../components/ui/PageHeader.vue";
 import { ApiError } from "../api/http";
 import { useAuthStore } from "../stores/auth";
 
@@ -26,6 +29,7 @@ async function submit(): Promise<void> {
     await auth.login({ email: form.email.trim(), password: form.password });
     await router.replace(redirect);
   } catch (e) {
+    // En el login un 401 son credenciales incorrectas: no hay fieldErrors.
     error.value = e instanceof ApiError ? e.message : "Error inesperado.";
   } finally {
     submitting.value = false;
@@ -34,22 +38,18 @@ async function submit(): Promise<void> {
 </script>
 
 <template>
-  <section class="mx-auto max-w-sm">
-    <h2 class="text-2xl font-semibold tracking-tight">Iniciar sesión</h2>
-    <p class="mt-2 text-sm text-slate-600">
-      Introduce tus credenciales para obtener un access token.
-    </p>
+  <section class="mx-auto max-w-sm space-y-4">
+    <PageHeader
+      title="Iniciar sesión"
+      description="Introduce tus credenciales para obtener un access token."
+    />
 
-    <p
-      v-if="auth.sessionExpired"
-      class="mt-4 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800"
-    >
+    <Alert v-if="auth.sessionExpired" variant="warning">
       Tu sesión ha caducado. Vuelve a iniciar sesión.
-    </p>
+    </Alert>
 
-    <form class="mt-6 space-y-4" novalidate @submit.prevent="submit">
-      <div>
-        <label for="email" class="block text-sm font-medium">Correo</label>
+    <form class="space-y-4" novalidate @submit.prevent="submit">
+      <FormField input-id="email" label="Correo" required>
         <input
           id="email"
           v-model="form.email"
@@ -58,10 +58,9 @@ async function submit(): Promise<void> {
           autocomplete="username"
           class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
         />
-      </div>
+      </FormField>
 
-      <div>
-        <label for="password" class="block text-sm font-medium">Contraseña</label>
+      <FormField input-id="password" label="Contraseña" required>
         <input
           id="password"
           v-model="form.password"
@@ -70,14 +69,9 @@ async function submit(): Promise<void> {
           autocomplete="current-password"
           class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
         />
-      </div>
+      </FormField>
 
-      <p
-        v-if="error"
-        class="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700"
-      >
-        {{ error }}
-      </p>
+      <Alert v-if="error" variant="error">{{ error }}</Alert>
 
       <button
         type="submit"
