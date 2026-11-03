@@ -12,6 +12,8 @@ import type { WarehouseListViewModel } from "../types/warehouse";
 const warehouses = useWarehousesStore();
 
 const searchInput = ref("");
+/** Aviso transaccional (p. ej. dado de baja por otro administrador). */
+const notice = ref<string | null>(null);
 
 const columns: TableColumn[] = [
   { key: "name", label: "Nombre" },
@@ -33,6 +35,26 @@ function clearFilters(): void {
   warehouses.resetFilters();
 }
 
+async function removeWarehouse(id: number, name: string | null): Promise<void> {
+  const label = name ?? `#${id}`;
+
+  // Un almacén puede tener stock asociado: la confirmación no lo dice porque
+  // la API no lo comprueba, pero al menos obliga a un clic consciente.
+  if (!window.confirm(`¿Dar de baja el almacén ${label}? Se ocultará del listado activo.`)) {
+    return;
+  }
+
+  notice.value = null;
+  const result = await warehouses.remove(id);
+
+  notice.value =
+    result === "removed"
+      ? `Almacén ${label} dado de baja.`
+      : result === "not_found"
+        ? `El almacén ${label} ya estaba dado de baja.`
+        : null; // error real: lo muestra el banner del store
+}
+
 onMounted(() => void warehouses.load());
 </script>
 
@@ -42,7 +64,15 @@ onMounted(() => void warehouses.load());
       <template #description>
         {{ warehouses.totalItems }} resultado{{ warehouses.totalItems === 1 ? "" : "s" }}
       </template>
+
+      <template #actions>
+        <RouterLink :to="{ name: 'warehouses.create' }" class="btn-primary">
+          Nuevo almacén
+        </RouterLink>
+      </template>
     </PageHeader>
+
+    <Alert v-if="notice" variant="warning">{{ notice }}</Alert>
 
     <!-- Filtros -->
     <form class="flex flex-wrap items-end gap-3" @submit.prevent="onSearch">
@@ -114,6 +144,25 @@ onMounted(() => void warehouses.load());
         >
           {{ row.isActive ? "Activo" : "De baja" }}
         </span>
+      </template>
+
+      <template #actions="{ row }">
+        <div class="flex justify-end gap-2">
+          <RouterLink
+            :to="{ name: 'warehouses.edit', params: { id: row.id } }"
+            class="btn-secondary btn-sm"
+          >
+            Editar
+          </RouterLink>
+          <button
+            v-if="row.isActive"
+            type="button"
+            class="btn-danger btn-sm"
+            @click="removeWarehouse(row.id, row.name)"
+          >
+            Dar de baja
+          </button>
+        </div>
       </template>
 
       <template #loading>
