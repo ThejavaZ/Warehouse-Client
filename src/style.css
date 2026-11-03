@@ -1,1 +1,46 @@
 @import "tailwindcss";
+
+/*
+ * Paleta de Warehouse.
+ *
+ * Morado = ASP.NET (el morado de Microsoft / .NET), verde = Vue (el verde
+ * oficial de vuejs.org), verde oscuro = estados de éxito y confirmación,
+ * gris = superficies y bordes (slate de Tailwind), blanco = fondo.
+ *
+ * Tailwind v4 genera las utilidades a partir de estas variables: declarar
+ * --color-primary-600 da bg-primary-600, text-primary-600 y border-primary-600.
+ * Sin esto, morado/verde no existirían como clases.
+ */
+@theme {
+  /* ── Primario: morado ASP.NET ─────────────────────────────────────────── */
+  --color-primary-50: #f5f3ff;
+  --color-primary-100: #ede9fe;
+  --color-primary-200: #ddd6fe;
+  --color-primary-300: #c4b5fd;
+  --color-primary-400: #a78bfa;
+  --color-primary-500: #8b5cf6;
+  --color-primary-600: #7c3aed; /* base: botones y enlaces */
+  --color-primary-700: #6d28d9; /* hover */
+  --color-primary-800: #5b21b6; /* hover oscuro / texto sobre 50 */
+  --color-primary-900: #4c1d95;
+
+  /* ── Acento: verde Vue (#42b883) ──────────────────────────────────────── */
+  --color-accent-50: #f0faf5;
+  --color-accent-100: #dcf5e9;
+  --color-accent-200: #bcead5;
+  --color-accent-300: #8edab8;
+  --color-accent-400: #5ec797;
+  --color-accent-500: #42b883; /* base: el verde de Vue */
+  --color-accent-600: #2f9a6d; /* hover */
+  --color-accent-700: #277d5a;
+  --color-accent-800: #23634a;
+  --color-accent-900: #1e513e;
+
+  /* ── Éxito: verde oscuro ──────────────────────────────────────────────── */
+  --color-success-50: #f0fdf4;
+  --color-success-100: #dcfce7;
+  --color-success-200: #bbf7d0;
+  --color-success-700: #15803d;
+  --color-success-800: #166534;
+  --color-success-900: #14532d;
+}
