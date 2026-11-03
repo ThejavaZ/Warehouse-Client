@@ -12,6 +12,8 @@ export class ApiError extends Error {
   readonly status: number;
   /** `code` de ProblemDetails: `not_found`, `validation_error`, `unauthorized`… */
   readonly code?: string;
+  /** Campo al que se refiere el error, si la API lo indica (`field`). */
+  readonly field?: string;
   /** Mensajes de validación agrupados por campo, si la API los envía. */
   readonly fieldErrors: Record<string, string[]>;
 
@@ -20,12 +22,14 @@ export class ApiError extends Error {
     message: string,
     code?: string,
     fieldErrors: Record<string, string[]> = {},
+    field?: string,
   ) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.code = code;
     this.fieldErrors = fieldErrors;
+    this.field = field;
   }
 }
 
@@ -110,10 +114,24 @@ function toApiError(
     );
   }
 
+  const field = body?.field;
+  const errors = body?.errors ?? {};
+
+  // La API tiene dos formatos de error por campo:
+  //  - `errors`: validación de DataAnnotations, varios campos a la vez
+  //  - `field`: un solo campo (SKU o correo duplicado, lanzado como
+  //    ArgumentException). Si no se normaliza aquí, la vista solo tendría el
+  //    mensaje general y no sabría debajo de qué input pintarlo.
+  const fieldErrors =
+    !field || Object.keys(errors).length > 0
+      ? errors
+      : { [field]: [body?.detail ?? body?.title ?? error.message] };
+
   return new ApiError(
     status,
     body?.detail ?? body?.title ?? error.message,
     body?.code,
-    body?.errors ?? {},
+    fieldErrors,
+    field,
   );
 }

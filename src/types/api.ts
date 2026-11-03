@@ -25,6 +25,11 @@ export interface ProblemDetails {
   instance?: string;
   /** Código de negocio estable: `not_found`, `validation_error`, `unauthorized`… */
   code?: string;
+  /**
+   * Campo al que se refiere el error, cuando la API lo sabe de un solo campo
+   * (p. ej. un SKU duplicado). Va en `extensions`, no en `errors`.
+   */
+  field?: string;
   traceId?: string;
 }
 
