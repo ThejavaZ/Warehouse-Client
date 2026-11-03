@@ -27,20 +27,18 @@ const auth = useAuthStore();
         endpoints protegidos.
       </p>
 
-      <div class="mt-6 flex gap-3">
-        <RouterLink
-          v-if="auth.isAuthenticated"
-          :to="{ name: 'users' }"
-          class="btn-primary"
-        >
-          Ir a usuarios
-        </RouterLink>
+      <!-- Accesos: los módulos protegidos, o el login si no hay sesión -->
+      <div class="mt-6 flex flex-wrap gap-3">
+        <template v-if="auth.isAuthenticated">
+          <RouterLink :to="{ name: 'users' }" class="btn-primary">
+            Usuarios
+          </RouterLink>
+          <RouterLink :to="{ name: 'products' }" class="btn-secondary">
+            Productos
+          </RouterLink>
+        </template>
 
-        <RouterLink
-          v-else
-          :to="{ name: 'login' }"
-          class="btn-primary"
-        >
+        <RouterLink v-else :to="{ name: 'login' }" class="btn-primary">
           Iniciar sesión
         </RouterLink>
       </div>
