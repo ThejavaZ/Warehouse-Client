@@ -13,9 +13,21 @@ const pinia = createPinia();
 setUnauthorizedHandler(() => {
   useAuthStore(pinia).handleUnauthorized();
 
-  if (router.currentRoute.value.name !== "login") {
-    void router.push({ name: "login" });
+  if (router.currentRoute.value.name === "login") {
+    return;
   }
+
+  // Se conserva la ruta actual para volver a ella tras autenticarse: es lo
+  // mismo que hace el guard en la primera visita. Sin esto, una sesión que
+  // caduca a mitad de uso manda al inicio en vez de a donde se estaba
+  // trabajando, y lo perdido es justo la página que costó llegar.
+  const from = router.currentRoute.value.fullPath;
+
+  void router.push({
+    name: "login",
+    // La raíz es el destino por defecto del login: no hace falta apuntarla.
+    ...(from === "/" ? {} : { query: { redirect: from } }),
+  });
 });
 
 // Pinia antes que el router: los guards leen stores.
