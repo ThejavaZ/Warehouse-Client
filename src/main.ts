@@ -11,7 +11,20 @@ const pinia = createPinia();
 // Un 401 con token significa que la sesión ya no sirve: se limpia en el store y
 // se vuelve al login. El handler lo instala quien conoce el router.
 setUnauthorizedHandler(() => {
-  useAuthStore(pinia).handleUnauthorized();
+  const auth = useAuthStore(pinia);
+  auth.handleUnauthorized();
+
+  // Al arrancar, el 401 del refresh llega mientras el guard todavía espera
+  // `ensureRestored()`. Si aquí se navegara, esa petición arrancaría otra
+  // navegación que abortaría la del guard, y con ella se perdería el
+  // `redirect` que el guard estaba a punto de devolver: tras entrar se
+  // volvería al inicio en vez de a la ruta que se estaba pidiendo.
+  //
+  // Ahí la navegación la hace el guard él solo; aquí solo cuando la sesión
+  // muere con la app ya abierta, que es el caso del fix anterior.
+  if (!auth.restored) {
+    return;
+  }
 
   if (router.currentRoute.value.name === "login") {
     return;
