@@ -7,7 +7,13 @@ import type {
 } from "../types/inventory";
 
 /**
- * Endpoints de `/api/Inventory`, todos con `[Authorize]`.
+ * Endpoints de `/api/InventoryItem`, todos con `[Authorize]`.
+ *
+ * El base path es `InventoryItem` y no `Inventory` por el nombre de la
+ * clase: `[Route("api/[controller]")]` sustituye `[controller]` por el
+ * nombre del controlador sin el sufijo `Controller`, y la clase se llama
+ * `InventoryItemController`. Apuntar a `/Inventory` da 404, no 401: la
+ * ruta ni siquiera existe.
  *
  * No hay `GET ...?id=` ni `DELETE`: las existencias no se editan ni se
  * borran, se mueven. El único camino para cambiar `quantity` es restock
@@ -25,13 +31,13 @@ import type {
 export const inventoryApi = {
   /** Listado paginado de pares almacén–producto, con filtros opcionales. */
   list: (query: InventoryQuery = {}): Promise<PagedResult<InventoryItemViewModel>> =>
-    http.get<PagedResult<InventoryItemViewModel>>("/Inventory", { params: query }).then((r) => r.data),
+    http.get<PagedResult<InventoryItemViewModel>>("/InventoryItem", { params: query }).then((r) => r.data),
 
   /** Entrada: suma `quantity`. Si el par no existe, lo crea. */
   restock: (dto: InventoryMovementDTO): Promise<InventoryItemViewModel> =>
-    http.post<InventoryItemViewModel>("/Inventory/restock", dto).then((r) => r.data),
+    http.post<InventoryItemViewModel>("/InventoryItem/restock", dto).then((r) => r.data),
 
   /** Salida: resta `quantity`. 409 si no hay saldo, 404 si no hay ficha. */
   consume: (dto: InventoryMovementDTO): Promise<InventoryItemViewModel> =>
-    http.post<InventoryItemViewModel>("/Inventory/consume", dto).then((r) => r.data),
+    http.post<InventoryItemViewModel>("/InventoryItem/consume", dto).then((r) => r.data),
 };

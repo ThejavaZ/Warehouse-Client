@@ -5,6 +5,9 @@
  * detalle por `id`: `InventoryQuery` solo admite `warehouseId` y `productId`,
  * y lo que devuelve siempre es el listado. La existencia de un par es
  * resultado de un movimiento, no algo que se crea desde un formulario.
+ *
+ * El base path es `/api/InventoryItem`, no `/api/Inventory`: lo decide el
+ * nombre de la clase `InventoryItemController`. Ver `api/inventory.ts`.
  */
 
 /** Fila del listado (`InventoryItemViewModel`): un par almacén–producto. */
