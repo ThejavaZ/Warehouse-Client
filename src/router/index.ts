@@ -81,6 +81,12 @@ export const router = createRouter({
       component: () => import("../views/InventoryView.vue"),
       meta: { requiresAuth: true },
     },
+    {
+      path: "/inventory/movement",
+      name: "inventory.move",
+      component: () => import("../views/InventoryMovementView.vue"),
+      meta: { requiresAuth: true },
+    },
     // Sin coincidencia → inicio, en vez de una página en blanco.
     { path: "/:pathMatch(.*)*", redirect: "/" },
   ],

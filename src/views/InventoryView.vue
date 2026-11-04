@@ -53,6 +53,12 @@ onMounted(() => {
         {{ inventory.totalItems }} par{{ inventory.totalItems === 1 ? "" : "s" }}
         almacén–producto
       </template>
+
+      <template #actions>
+        <RouterLink :to="{ name: 'inventory.move' }" class="btn-primary">
+          Registrar movimiento
+        </RouterLink>
+      </template>
     </PageHeader>
 
     <!--
@@ -150,6 +156,29 @@ onMounted(() => {
 
       <template #cell-updated="{ row }">
         <span class="text-slate-600">{{ formatDate(row.updatedAt) }}</span>
+      </template>
+
+      <template #actions="{ row }">
+        <div class="flex justify-end gap-2">
+          <RouterLink
+            :to="{
+              name: 'inventory.move',
+              query: { warehouseId: row.warehouseId, productId: row.productId, mode: 'restock' },
+            }"
+            class="btn-secondary btn-sm"
+          >
+            Entrada
+          </RouterLink>
+          <RouterLink
+            :to="{
+              name: 'inventory.move',
+              query: { warehouseId: row.warehouseId, productId: row.productId, mode: 'consume' },
+            }"
+            class="btn-danger btn-sm"
+          >
+            Salida
+          </RouterLink>
+        </div>
       </template>
 
       <template #loading>
