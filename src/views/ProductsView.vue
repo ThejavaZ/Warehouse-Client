@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import Alert from "../components/ui/Alert.vue";
+import ConfirmDialog from "../components/ui/ConfirmDialog.vue";
 import DataTable, { type TableColumn } from "../components/ui/DataTable.vue";
 import EmptyState from "../components/ui/EmptyState.vue";
 import LoadingState from "../components/ui/LoadingState.vue";
@@ -49,22 +50,38 @@ function clearFilters(): void {
   products.resetFilters();
 }
 
-async function removeProduct(id: number, sku: string | null): Promise<void> {
-  const label = sku ?? `#${id}`;
+/**
+ * Baja lógica con confirmación en dos pasos: el botón de la fila solo
+ * guarda qué registro pendiente, y el diálogo hace la petición. Así se
+ * puede mantener abierto mientras carga y bloquear el doble clic.
+ */
+const pending = ref<{ id: number; label: string } | null>(null);
+const removing = ref(false);
 
-  if (!window.confirm(`¿Dar de baja el producto ${label}? Se ocultará del catálogo activo.`)) {
-    return;
-  }
+function askRemove(id: number, sku: string | null): void {
+  pending.value = { id, label: sku ?? `#${id}` };
+}
 
+async function confirmRemove(): Promise<void> {
+  if (pending.value === null || removing.value) return;
+
+  const { id, label } = pending.value;
+  removing.value = true;
   notice.value = null;
-  const result = await products.remove(id);
 
-  notice.value =
-    result === "removed"
-      ? `Producto ${label} dado de baja.`
-      : result === "not_found"
-        ? `El producto ${label} ya estaba dado de baja.`
-        : null;
+  try {
+    const result = await products.remove(id);
+
+    notice.value =
+      result === "removed"
+        ? `Producto ${label} dado de baja.`
+        : result === "not_found"
+          ? `El producto ${label} ya estaba dado de baja.`
+          : null; // error real: lo muestra el banner del store
+  } finally {
+    removing.value = false;
+    pending.value = null;
+  }
 }
 
 onMounted(() => void products.load());
@@ -174,7 +191,7 @@ onMounted(() => void products.load());
             v-if="row.isActive"
             type="button"
             class="btn-danger btn-sm"
-            @click="removeProduct(row.id, row.sku)"
+            @click="askRemove(row.id, row.sku)"
           >
             Dar de baja
           </button>
@@ -195,6 +212,17 @@ onMounted(() => void products.load());
       :total-pages="products.totalPages"
       :loading="products.loading"
       @change="products.goToPage"
+    />
+
+    <ConfirmDialog
+      :open="pending !== null"
+      title="Dar de baja"
+      :message="pending ? `¿Dar de baja el producto ${pending.label}? Se ocultará del catálogo activo.` : ''"
+      confirm-label="Dar de baja"
+      danger
+      :loading="removing"
+      @confirm="confirmRemove"
+      @cancel="pending = null"
     />
   </section>
 </template>

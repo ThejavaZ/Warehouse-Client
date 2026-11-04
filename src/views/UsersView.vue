@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import Alert from "../components/ui/Alert.vue";
+import ConfirmDialog from "../components/ui/ConfirmDialog.vue";
 import DataTable, { type TableColumn } from "../components/ui/DataTable.vue";
 import EmptyState from "../components/ui/EmptyState.vue";
 import LoadingState from "../components/ui/LoadingState.vue";
@@ -38,22 +39,38 @@ function clearFilters(): void {
   users.resetFilters();
 }
 
-async function removeUser(id: number, email: string | null): Promise<void> {
-  const label = email ?? `#${id}`;
+/**
+ * Baja lógica con confirmación en dos pasos: el botón de la fila solo
+ * guarda qué registro pendiente, y el diálogo hace la petición. Así se
+ * puede mantener abierto mientras carga y bloquear el doble clic.
+ */
+const pending = ref<{ id: number; label: string } | null>(null);
+const removing = ref(false);
 
-  if (!window.confirm(`¿Dar de baja a ${label}? Se ocultará del listado activo.`)) {
-    return;
-  }
+function askRemove(id: number, email: string | null): void {
+  pending.value = { id, label: email ?? `#${id}` };
+}
 
+async function confirmRemove(): Promise<void> {
+  if (pending.value === null || removing.value) return;
+
+  const { id, label } = pending.value;
+  removing.value = true;
   notice.value = null;
-  const result = await users.remove(id);
 
-  notice.value =
-    result === "removed"
-      ? `Usuario ${label} dado de baja.`
-      : result === "not_found"
-        ? `El usuario ${label} ya estaba dado de baja.`
-        : null; // error real: lo muestra el banner del store
+  try {
+    const result = await users.remove(id);
+
+    notice.value =
+      result === "removed"
+        ? `Usuario ${label} dado de baja.`
+        : result === "not_found"
+          ? `El usuario ${label} ya estaba dado de baja.`
+          : null; // error real: lo muestra el banner del store
+  } finally {
+    removing.value = false;
+    pending.value = null;
+  }
 }
 
 onMounted(() => void users.load());
@@ -163,7 +180,7 @@ onMounted(() => void users.load());
             v-if="row.isActive"
             type="button"
             class="btn-danger btn-sm"
-            @click="removeUser(row.id, row.email)"
+            @click="askRemove(row.id, row.email)"
           >
             Dar de baja
           </button>
@@ -184,6 +201,17 @@ onMounted(() => void users.load());
       :total-pages="users.totalPages"
       :loading="users.loading"
       @change="users.goToPage"
+    />
+
+    <ConfirmDialog
+      :open="pending !== null"
+      title="Dar de baja"
+      :message="pending ? `¿Dar de baja a ${pending.label}? Se ocultará del listado activo.` : ''"
+      confirm-label="Dar de baja"
+      danger
+      :loading="removing"
+      @confirm="confirmRemove"
+      @cancel="pending = null"
     />
   </section>
 </template>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import Alert from "../components/ui/Alert.vue";
+import ConfirmDialog from "../components/ui/ConfirmDialog.vue";
 import DataTable, { type TableColumn } from "../components/ui/DataTable.vue";
 import EmptyState from "../components/ui/EmptyState.vue";
 import LoadingState from "../components/ui/LoadingState.vue";
@@ -35,24 +36,41 @@ function clearFilters(): void {
   warehouses.resetFilters();
 }
 
-async function removeWarehouse(id: number, name: string | null): Promise<void> {
-  const label = name ?? `#${id}`;
+/**
+ * Baja lógica con confirmación en dos pasos: el botón de la fila solo
+ * guarda qué registro pendiente, y el diálogo hace la petición. Así se
+ * puede mantener abierto mientras carga y bloquear el doble clic.
+ *
+ * Un almacén puede tener stock asociado: la confirmación no lo dice porque
+ * la API no lo comprueba, pero al menos obliga a un clic consciente.
+ */
+const pending = ref<{ id: number; label: string } | null>(null);
+const removing = ref(false);
 
-  // Un almacén puede tener stock asociado: la confirmación no lo dice porque
-  // la API no lo comprueba, pero al menos obliga a un clic consciente.
-  if (!window.confirm(`¿Dar de baja el almacén ${label}? Se ocultará del listado activo.`)) {
-    return;
-  }
+function askRemove(id: number, name: string | null): void {
+  pending.value = { id, label: name ?? `#${id}` };
+}
 
+async function confirmRemove(): Promise<void> {
+  if (pending.value === null || removing.value) return;
+
+  const { id, label } = pending.value;
+  removing.value = true;
   notice.value = null;
-  const result = await warehouses.remove(id);
 
-  notice.value =
-    result === "removed"
-      ? `Almacén ${label} dado de baja.`
-      : result === "not_found"
-        ? `El almacén ${label} ya estaba dado de baja.`
-        : null; // error real: lo muestra el banner del store
+  try {
+    const result = await warehouses.remove(id);
+
+    notice.value =
+      result === "removed"
+        ? `Almacén ${label} dado de baja.`
+        : result === "not_found"
+          ? `El almacén ${label} ya estaba dado de baja.`
+          : null; // error real: lo muestra el banner del store
+  } finally {
+    removing.value = false;
+    pending.value = null;
+  }
 }
 
 onMounted(() => void warehouses.load());
@@ -158,7 +176,7 @@ onMounted(() => void warehouses.load());
             v-if="row.isActive"
             type="button"
             class="btn-danger btn-sm"
-            @click="removeWarehouse(row.id, row.name)"
+            @click="askRemove(row.id, row.name)"
           >
             Dar de baja
           </button>
@@ -179,6 +197,17 @@ onMounted(() => void warehouses.load());
       :total-pages="warehouses.totalPages"
       :loading="warehouses.loading"
       @change="warehouses.goToPage"
+    />
+
+    <ConfirmDialog
+      :open="pending !== null"
+      title="Dar de baja"
+      :message="pending ? `¿Dar de baja el almacén ${pending.label}? Se ocultará del listado activo.` : ''"
+      confirm-label="Dar de baja"
+      danger
+      :loading="removing"
+      @confirm="confirmRemove"
+      @cancel="pending = null"
     />
   </section>
 </template>
